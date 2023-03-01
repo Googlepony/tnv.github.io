@@ -8,7 +8,7 @@ const app = express();
 // configure multer for handling file upload
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './uploads');
+        cb(null, './');
     },
     filename: (req, file, cb) => {
         cb(null, file.originalname);
