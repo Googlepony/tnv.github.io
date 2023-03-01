@@ -28,17 +28,32 @@ app.post('/api/convert', upload.single('pdf'), async (req, res) => {
         let csvData = '';
         fileStream.on('data', chunk => csvData += chunk);
         fileStream.on('end', () => {
-            res.setHeader('Content-Type', 'text/csv');
-            res.setHeader('Content-Disposition', `attachment; filename=${path.parse(req.file.originalname).name}.csv`);
-            res.send(csvData);
+            const jsonArray = csvToJson(csvData);
+            res.setHeader('Content-Type', 'application/json');
+            res.setHeader('Content-Disposition', `attachment; filename=${path.parse(req.file.originalname).name}.json`);
+            res.send(jsonArray);
         });
     } catch (err) {
         res.status(500).send(`Error occurred while processing PDF: ${err.message}`);
     }
 });
 
-module.exports = app;
+function csvToJson(csvData) {
+    const lines = csvData.trim().split('\n');
+    const headers = lines.shift().split(',');
+    return lines.map(line => {
+        const values = line.split(',');
+        return headers.reduce((obj, header, index) => {
+            obj[header] = values[index];
+            return obj;
+        }, {});
+    });
+}
 
+module.exports = app;
+// app.listen(process.env.PORT || 3000, () => {
+//     console.log(`Server listening on port ${process.env.PORT || 3000}`);
+// });
 
 
 
